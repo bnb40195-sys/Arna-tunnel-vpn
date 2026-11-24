@@ -1,0 +1,6 @@
+{
+  "name": "ABR tunnel vpn",
+  "description": "ABR tunnel vpn - تطبيق في بي إن احترافي فائق السرعة مع خزنة تخزين إنترنت الشريحة (4G/5G) والواي فاي وإعادة استخدامه مجاناً وبلا حدود، مع مركز مساعدة شامل ودعم كامل للغة العربية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

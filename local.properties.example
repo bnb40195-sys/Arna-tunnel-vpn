@@ -1,0 +1,15 @@
+## Copy this file to `local.properties` and set the path to your Android SDK
+## انسخ هذا الملف باسم local.properties وضع مسار حزمة Android SDK على جهازك
+
+# Linux example:
+# sdk.dir=/home/USER/Android/Sdk
+
+# macOS example:
+# sdk.dir=/Users/USER/Library/Android/sdk
+
+# Windows example (use double backslashes or forward slashes):
+# sdk.dir=C\:\\Users\\USER\\AppData\\Local\\Android\\Sdk
+# sdk.dir=C:/Users/USER/AppData/Local/Android/Sdk
+
+# Termux / Android CLI example:
+# sdk.dir=/data/data/com.termux/files/home/android-sdk
