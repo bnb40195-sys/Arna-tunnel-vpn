@@ -20,16 +20,16 @@ export const DNSTTConfig: React.FC<DNSTTConfigProps> = ({
   const t = translations[language];
   const isAr = language === 'ar';
 
-  const [serverString, setServerString] = useState('dnstt.abrtunnel.net:22@abr_dns:secret99');
+  const [serverString, setServerString] = useState('dnstt.arnatunnel.net:22@arna_dns:secret99');
   const [dnsResolver, setDnsResolver] = useState('Cloudflare DNS (UDP) - 1.1.1.1');
-  const [nameserver, setNameserver] = useState('dns.abrtunnel.net');
+  const [nameserver, setNameserver] = useState('dns.arnatunnel.net');
   const [publicKey, setPublicKey] = useState('c64d28e4695b2d718915ae52723c34f20bf803b30');
 
   const handleConnect = () => {
     onSaveAndConnect({
       server: serverString,
       port: 22,
-      username: serverString.split('@')[1]?.split(':')[0] || 'abr_dns',
+      username: serverString.split('@')[1]?.split(':')[0] || 'arna_dns',
       password: serverString.split('@')[1]?.split(':')[1] || 'secret99',
       dnsResolver,
       dnsResolverCustom: '',

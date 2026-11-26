@@ -22,7 +22,7 @@ export const SSHConfig: React.FC<SSHConfigProps> = ({
   const t = translations[language];
   const isAr = language === 'ar';
 
-  const [serverString, setServerString] = useState('ssh.abrtunnel.net:22@abr_user:abr_pass123');
+  const [serverString, setServerString] = useState('ssh.arnatunnel.net:22@arna_user:arna_pass123');
   const [httpProxy, setHttpProxy] = useState(false);
   const [proxyHost, setProxyHost] = useState('104.16.123.96:8080');
   const [customPayload, setCustomPayload] = useState(false);
@@ -33,8 +33,8 @@ export const SSHConfig: React.FC<SSHConfigProps> = ({
   const handleConnect = () => {
     onSaveAndConnect({
       server: serverString,
-      username: serverString.split('@')[1]?.split(':')[0] || 'abr_user',
-      password: serverString.split('@')[1]?.split(':')[1] || 'abr_pass',
+      username: serverString.split('@')[1]?.split(':')[0] || 'arna_user',
+      password: serverString.split('@')[1]?.split(':')[1] || 'arna_pass',
       port: 22,
       httpProxy,
       proxyHost,

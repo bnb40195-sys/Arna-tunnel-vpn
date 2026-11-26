@@ -20,8 +20,8 @@ export const HysteriaConfig: React.FC<HysteriaConfigProps> = ({
   const t = translations[language];
   const isAr = language === 'ar';
 
-  const [server, setServer] = useState('hysteria.abrtunnel.net:443');
-  const [authPassword, setAuthPassword] = useState('abr_secret_pass_2026');
+  const [server, setServer] = useState('hysteria.arnatunnel.net:443');
+  const [authPassword, setAuthPassword] = useState('arna_secret_pass_2026');
   const [sni, setSni] = useState('www.snapchat.com');
   const [allowInsecure, setAllowInsecure] = useState(true);
   const [certificatePin, setCertificatePin] = useState(false);

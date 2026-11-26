@@ -125,10 +125,6 @@ export const DeviceFingerprint: React.FC<DeviceFingerprintProps> = ({
 
         <div className="space-y-1.5 text-xs font-mono pt-1">
           <div className="flex justify-between py-1 border-b border-slate-800/60">
-            <span className="text-slate-400">{isAr ? 'الطراز' : 'Model'}</span>
-            <span className="text-emerald-300" dir="ltr">ABR Mobile Pro</span>
-          </div>
-          <div className="flex justify-between py-1 border-b border-slate-800/60">
             <span className="text-slate-400">{isAr ? 'إصدار النظام' : 'Android'}</span>
             <span className="text-emerald-300" dir="ltr">14 (API 34)</span>
           </div>

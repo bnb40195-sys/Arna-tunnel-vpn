@@ -22,7 +22,7 @@ export const V2RayConfig: React.FC<V2RayConfigProps> = ({
 
   const [mode, setMode] = useState<'visual' | 'editor'>('visual');
   const [protocol, setProtocol] = useState<'VLESS' | 'VMess' | 'Trojan' | 'Shadowsocks'>('VLESS');
-  const [server, setServer] = useState('xray.abrtunnel.net');
+  const [server, setServer] = useState('xray.arnatunnel.net');
   const [port, setPort] = useState(443);
   const [uuid, setUuid] = useState('b831381d-6324-4d53-ad4f-8cda48b30811');
   const [encryption, setEncryption] = useState('none');
@@ -41,7 +41,7 @@ export const V2RayConfig: React.FC<V2RayConfigProps> = ({
       "settings": {
         "vnext": [
           {
-            "address": "xray.abrtunnel.net",
+            "address": "xray.arnatunnel.net",
             "port": 443,
             "users": [
               {

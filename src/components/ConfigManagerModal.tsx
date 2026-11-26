@@ -360,7 +360,7 @@ export const ConfigManagerModal: React.FC<ConfigManagerModalProps> = ({
     }
   };
 
-  // Import handler (supports ARNA://, ABR://, vless://, OpenVPN .ovpn, and JSON)
+  // Import handler (supports AN://, ARNA://, vless://, OpenVPN .ovpn, and JSON)
   const handleExecuteImport = (rawContent: string) => {
     setImportError(null);
     setImportSuccess(null);
@@ -441,8 +441,6 @@ export const ConfigManagerModal: React.FC<ConfigManagerModalProps> = ({
           jsonStr = decodeURIComponent(escape(atob(trimmed.replace('AN://', ''))));
         } else if (trimmed.startsWith('ARNA://')) {
           jsonStr = decodeURIComponent(escape(atob(trimmed.replace('ARNA://', ''))));
-        } else if (trimmed.startsWith('ABR://')) {
-          jsonStr = decodeURIComponent(escape(atob(trimmed.replace('ABR://', ''))));
         } else {
           jsonStr = trimmed;
         }
@@ -937,7 +935,7 @@ export const ConfigManagerModal: React.FC<ConfigManagerModalProps> = ({
                     <span>{isAr ? 'اختيار ملف من الجهاز' : 'Choose File'}</span>
                     <input
                       type="file"
-                      accept=".an,.arna,.abr,.json,.ovpn,.hat,.txt"
+                      accept=".an,.arna,.json,.ovpn,.hat,.txt"
                       onChange={handleFileDrop}
                       className="hidden"
                     />

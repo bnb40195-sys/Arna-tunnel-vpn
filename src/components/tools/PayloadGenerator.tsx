@@ -214,7 +214,7 @@ export const PayloadGenerator: React.FC<PayloadGeneratorProps> = ({
   const [customHeaders, setCustomHeaders] = useState([
     { name: 'X-Online-Host', value: '[host]' },
     { name: 'Connection', value: 'Keep-Alive' },
-    { name: 'User-Agent', value: 'ABR-Tunnel/4.0' }
+    { name: 'User-Agent', value: 'Arna-Tunnel/1.0' }
   ]);
   const [generatedPayload, setGeneratedPayload] = useState(
     'CONNECT [host_port] HTTP/1.1[crlf]Host: www.snapchat.com[crlf]X-Online-Host: www.snapchat.com[crlf]Connection: Keep-Alive[crlf][crlf]'

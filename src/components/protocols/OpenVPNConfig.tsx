@@ -22,11 +22,11 @@ export const OpenVPNConfig: React.FC<OpenVPNConfigProps> = ({
   const t = translations[language];
   const isAr = language === 'ar';
 
-  const [profileName, setProfileName] = useState('abr_vpn_fast.ovpn');
+  const [profileName, setProfileName] = useState('arna_vpn_fast.ovpn');
   const [remoteOverride, setRemoteOverride] = useState(false);
   const [remoteHost, setRemoteHost] = useState('149.202.88.19:1194');
   const [authCredentials, setAuthCredentials] = useState(true);
-  const [username, setUsername] = useState('abr_client');
+  const [username, setUsername] = useState('arna_client');
   const [password, setPassword] = useState('secure_tunnel_pass');
   const [sni, setSni] = useState(isSslMode);
   const [sniHost, setSniHost] = useState('www.snapchat.com');
@@ -38,7 +38,7 @@ export const OpenVPNConfig: React.FC<OpenVPNConfigProps> = ({
   const handleConnect = () => {
     onSaveAndConnect({
       profileName,
-      ovpnContent: '# ABR OpenVPN Profile Data\nclient\ndev tun\nproto tcp\nremote 149.202.88.19 1194\nresolv-retry infinite\nnobind\npersist-key\npersist-tun\nauth-user-pass\n',
+      ovpnContent: '# Arna OpenVPN Profile Data\nclient\ndev tun\nproto tcp\nremote 149.202.88.19 1194\nresolv-retry infinite\nnobind\npersist-key\npersist-tun\nauth-user-pass\n',
       remoteOverride,
       remoteHost,
       remotePort: 1194,
