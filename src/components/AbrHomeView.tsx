@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Shield,
-  ArrowDown,
-  ArrowUp,
   CheckCircle2,
   ChevronDown,
   Server,
@@ -27,7 +25,6 @@ import {
   AbrTunnelConfig,
   ExportableConfigFile
 } from '../types/vpn';
-import { formatBytes } from '../utils/mockData';
 import { READY_MADE_CONFIGS } from '../utils/readyConfigs';
 import { THEMES } from '../utils/theme';
 
@@ -41,8 +38,6 @@ interface AbrHomeViewProps {
   onUpdateAbrConfig: (updates: Partial<AbrTunnelConfig>) => void;
   onApplyConfig: (config: ExportableConfigFile) => void;
   activeConfigName?: string | null;
-  uploadedBytes: number;
-  downloadedBytes: number;
   onOpenVpnShare?: () => void;
   onAddServer?: (server: Omit<VpnServer, 'id'>) => void;
   onDeleteServer?: (serverId: string) => void;
@@ -110,8 +105,6 @@ export const AbrHomeView: React.FC<AbrHomeViewProps> = ({
   onUpdateAbrConfig,
   onApplyConfig,
   activeConfigName,
-  uploadedBytes,
-  downloadedBytes,
   onOpenVpnShare,
   onAddServer,
   onDeleteServer,
@@ -272,22 +265,6 @@ export const AbrHomeView: React.FC<AbrHomeViewProps> = ({
                 <MapPin className={`w-2.5 h-2.5 ${theme.textClass} absolute -bottom-0.5 -right-0.5`} />
               </div>
             </button>
-          </div>
-        </div>
-
-        {/* Compact Data Counter Pill */}
-        <div className="py-1.5 px-4 rounded-full bg-[#070b14] border border-slate-800/90 flex items-center justify-center gap-6 text-[11px] font-mono font-bold text-slate-200">
-          <div className="flex items-center gap-1.5">
-            <span>{formatBytes(downloadedBytes, 2, language)}</span>
-            <span className={`w-4 h-4 rounded-full ${theme.solidBgClass} ${theme.solidTextClass} inline-flex items-center justify-center`}>
-              <ArrowDown className="w-2.5 h-2.5 stroke-[3]" />
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span>{formatBytes(uploadedBytes, 2, language)}</span>
-            <span className={`w-4 h-4 rounded-full ${theme.bgSoftClass} border ${theme.borderActiveClass} ${theme.textLightClass} inline-flex items-center justify-center`}>
-              <ArrowUp className="w-2.5 h-2.5 stroke-[3]" />
-            </span>
           </div>
         </div>
 
