@@ -118,7 +118,9 @@ fi
 
 if [ -n "$SDKMANAGER" ]; then
   echo "[+] Accepting Android SDK licenses and installing API 35 & Build-Tools 35.0.0..."
-  yes | "$SDKMANAGER" --sdk_root="$SDK_DIR" --licenses >/dev/null || true
+  set +o pipefail
+  yes | "$SDKMANAGER" --sdk_root="$SDK_DIR" --licenses >/dev/null 2>&1 || true
+  set -o pipefail
   "$SDKMANAGER" --sdk_root="$SDK_DIR" \
     "cmdline-tools;latest" \
     "platform-tools" \
@@ -133,6 +135,9 @@ fi
 echo "[+] Building Android web bundle and syncing assets..."
 cd "$ROOT_DIR"
 if [ -f package.json ] && command -v npm >/dev/null 2>&1; then
+  if [ ! -d node_modules ]; then
+    npm install --legacy-peer-deps --no-audit --no-fund
+  fi
   ANDROID_BUILD=true npm run build
   rm -rf "$ROOT_DIR/app/src/main/assets/www"
   mkdir -p "$ROOT_DIR/app/src/main/assets/www"
