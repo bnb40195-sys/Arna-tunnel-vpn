@@ -14,7 +14,10 @@ import {
   Rocket,
   Check,
   MapPin,
-  Share2
+  Share2,
+  Plus,
+  Trash2,
+  Activity
 } from 'lucide-react';
 import {
   ConnectionState,
@@ -41,6 +44,9 @@ interface AbrHomeViewProps {
   uploadedBytes: number;
   downloadedBytes: number;
   onOpenVpnShare?: () => void;
+  onAddServer?: (server: Omit<VpnServer, 'id'>) => void;
+  onDeleteServer?: (serverId: string) => void;
+  onOpenServerAnalyzer?: () => void;
   language: LanguageCode;
   themeAccent: ThemeAccent;
 }
@@ -107,6 +113,9 @@ export const AbrHomeView: React.FC<AbrHomeViewProps> = ({
   uploadedBytes,
   downloadedBytes,
   onOpenVpnShare,
+  onAddServer,
+  onDeleteServer,
+  onOpenServerAnalyzer,
   language,
   themeAccent,
 }) => {
@@ -150,6 +159,14 @@ export const AbrHomeView: React.FC<AbrHomeViewProps> = ({
   const [selectorCategory, setSelectorCategory] = useState<'all' | 'arab' | 'wifi' | 'social'>('all');
   const [serverSearch, setServerSearch] = useState('');
   const [sessionSeconds, setSessionSeconds] = useState(0);
+  const [isAddServerOpen, setIsAddServerOpen] = useState(false);
+  const [newSrvName, setNewSrvName] = useState('');
+  const [newSrvIp, setNewSrvIp] = useState('');
+  const [newSrvCountry, setNewSrvCountry] = useState('🇩🇿 الجزائر');
+  const [newSrvCity, setNewSrvCity] = useState('');
+  const [newSrvType, setNewSrvType] = useState('Custom SNI / SSL');
+  const [newSrvChecking, setNewSrvChecking] = useState(false);
+  const [newSrvError, setNewSrvError] = useState<string | null>(null);
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | undefined;
@@ -655,33 +672,197 @@ export const AbrHomeView: React.FC<AbrHomeViewProps> = ({
       {/* 7. SERVER SELECTION MODAL */}
       {isServerModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className={`w-full max-w-md max-h-[85vh] bg-[#0a101d] border ${theme.borderClass} rounded-3xl shadow-2xl flex flex-col overflow-hidden`}>
+          <div className={`w-full max-w-md max-h-[88vh] bg-[#0a101d] border ${theme.borderClass} rounded-3xl shadow-2xl flex flex-col overflow-hidden`}>
             {/* Modal Header */}
             <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
               <div className="flex items-center gap-2">
                 <Server className={`w-4 h-4 ${theme.textClass}`} />
                 <h3 className="text-sm font-bold text-white font-mono">{txt.selectServerTitle}</h3>
               </div>
-              <button
-                onClick={() => setIsServerModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                {onOpenServerAnalyzer && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsServerModalOpen(false);
+                      onOpenServerAnalyzer();
+                    }}
+                    className={`px-2.5 py-1.5 rounded-xl ${theme.bgSoftClass} border ${theme.borderClass} ${theme.textLightClass} text-[11px] font-mono font-bold flex items-center gap-1 hover:opacity-90`}
+                    title={isAr ? 'تحليل وفحص السيرفرات' : 'Analyze Servers'}
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    <span>{isAr ? 'تحليل' : 'Analyze'}</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsServerModalOpen(false)}
+                  className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
-            {/* Search Input */}
-            <div className="p-3 border-b border-slate-800 bg-slate-950">
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none" />
-                <input
-                  type="text"
-                  value={serverSearch}
-                  onChange={(e) => setServerSearch(e.target.value)}
-                  placeholder={txt.searchPlaceholder}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-slate-600"
-                />
+            {/* Search + Add Server Toggle */}
+            <div className="p-3 border-b border-slate-800 bg-slate-950 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={serverSearch}
+                    onChange={(e) => setServerSearch(e.target.value)}
+                    placeholder={txt.searchPlaceholder}
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-slate-600"
+                  />
+                </div>
+                {onAddServer && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddServerOpen((v) => !v);
+                      setNewSrvError(null);
+                    }}
+                    className={`px-3 py-2 rounded-xl font-mono font-bold text-xs flex items-center gap-1.5 shrink-0 transition-all active:scale-95 ${
+                      isAddServerOpen
+                        ? 'bg-slate-800 text-white border border-slate-700'
+                        : `${theme.solidBgClass} ${theme.solidHoverClass} ${theme.solidTextClass} shadow-md`
+                    }`}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{isAr ? 'إضافة سيرفر' : 'Add'}</span>
+                  </button>
+                )}
               </div>
+
+              {/* Inline Add New Server Form */}
+              {isAddServerOpen && onAddServer && (
+                <div className={`p-3 rounded-2xl bg-slate-900/95 border ${theme.borderClass} space-y-2.5 animate-fade-in`}>
+                  <div className={`text-xs font-bold font-mono ${theme.textClass} flex items-center gap-1.5`}>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{isAr ? 'إضافة سيرفر جديد' : 'Add New Server'}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={newSrvName}
+                      onChange={(e) => setNewSrvName(e.target.value)}
+                      placeholder={isAr ? 'اسم السيرفر (مثال: VIP 1)' : 'Server Name'}
+                      className="px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      dir="ltr"
+                      value={newSrvIp}
+                      onChange={(e) => setNewSrvIp(e.target.value)}
+                      placeholder="IP / Host:Port"
+                      className="px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      value={newSrvCountry}
+                      onChange={(e) => setNewSrvCountry(e.target.value)}
+                      className="px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none"
+                    >
+                      <option value="🇩🇿 الجزائر">🇩🇿 الجزائر</option>
+                      <option value="🇸🇦 السعودية">🇸🇦 السعودية</option>
+                      <option value="🇦🇪 الإمارات">🇦🇪 الإمارات</option>
+                      <option value="🇲🇦 المغرب">🇲🇦 المغرب</option>
+                      <option value="🇪🇬 مصر">🇪🇬 مصر</option>
+                      <option value="🇩🇪 ألمانيا">🇩🇪 ألمانيا</option>
+                      <option value="🇫🇷 فرنسا">🇫🇷 فرنسا</option>
+                      <option value="🇺🇸 أمريكا">🇺🇸 أمريكا</option>
+                      <option value="🇬🇧 بريطانيا">🇬🇧 بريطانيا</option>
+                      <option value="🇨🇦 كندا">🇨🇦 كندا</option>
+                      <option value="🇸🇬 سنغافورة">🇸🇬 سنغافورة</option>
+                      <option value="🌐 مخصص">🌐 مخصص</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={newSrvCity}
+                      onChange={(e) => setNewSrvCity(e.target.value)}
+                      placeholder={isAr ? 'المدينة (اختياري)' : 'City (optional)'}
+                      className="px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none"
+                    />
+                  </div>
+
+                  <select
+                    value={newSrvType}
+                    onChange={(e) => setNewSrvType(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono focus:outline-none"
+                  >
+                    <option value="Custom SNI / SSL">Custom SNI / SSL</option>
+                    <option value="V2Ray / VLESS">V2Ray / VLESS</option>
+                    <option value="SSH / SSL">SSH / SSL</option>
+                    <option value="Hysteria UDP">Hysteria UDP</option>
+                    <option value="OpenVPN">OpenVPN</option>
+                    <option value="DNSTT">DNSTT</option>
+                  </select>
+
+                  {newSrvError && (
+                    <div className="text-[11px] text-rose-300 font-mono">{newSrvError}</div>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={newSrvChecking}
+                    onClick={async () => {
+                      const rawHostPort = newSrvIp.trim();
+                      if (!rawHostPort) {
+                        setNewSrvError(isAr ? 'يرجى إدخال عنوان IP أو نطاق السيرفر' : 'Please enter Server IP or Host');
+                        return;
+                      }
+                      setNewSrvError(null);
+                      setNewSrvChecking(true);
+                      const [hostPart, portPart] = rawHostPort.replace(/^https?:\/\//i, '').split('/')[0].split(':');
+                      const portNum = parseInt(portPart || '443', 10) || 443;
+                      let measuredPing = 35;
+
+                      try {
+                        const r = await fetch(`/api/check-host?host=${encodeURIComponent(hostPart)}&port=${portNum}&method=HEAD`);
+                        const d = await r.json();
+                        if (d.ok) {
+                          measuredPing = d.tls?.latencyMs || d.tcp?.latencyMs || d.dnsMs || 35;
+                        }
+                      } catch {
+                        // Offline or custom internal host — save cleanly with default ping
+                      }
+
+                      const parts = newSrvCountry.split(' ');
+                      const flagEmoji = parts[0] || '🌐';
+                      const countryLabel = parts.slice(1).join(' ') || newSrvCountry;
+
+                      onAddServer({
+                        name: newSrvName.trim() || `${countryLabel} (${hostPart})`,
+                        country: countryLabel,
+                        city: newSrvCity.trim() || `${hostPart}:${portNum}`,
+                        countryCode: 'CUSTOM',
+                        flag: flagEmoji,
+                        ip: `${hostPart}:${portNum}`,
+                        ping: measuredPing,
+                        load: 20,
+                        type: newSrvType,
+                        speed: '10 Gbps Custom',
+                        isCustom: true,
+                      });
+
+                      setNewSrvName('');
+                      setNewSrvIp('');
+                      setNewSrvCity('');
+                      setNewSrvChecking(false);
+                      setIsAddServerOpen(false);
+                      setIsServerModalOpen(false);
+                    }}
+                    className={`w-full py-2.5 rounded-xl ${theme.buttonClass} font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-md`}
+                  >
+                    {newSrvChecking ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    <span>{newSrvChecking ? (isAr ? 'جاري الفحص والحفظ...' : 'Testing & Saving...') : (isAr ? 'فحص وحفظ السيرفر' : 'Test & Save Server')}</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Server List */}
@@ -690,34 +871,39 @@ export const AbrHomeView: React.FC<AbrHomeViewProps> = ({
                 const isCurrent = srv.id === selectedServer.id;
                 const loc = getLocalizedServer(srv, language);
                 return (
-                  <button
+                  <div
                     key={srv.id}
                     onClick={() => {
                       onSelectServer(srv);
                       setIsServerModalOpen(false);
                     }}
-                    className={`w-full p-3 rounded-2xl border text-start flex items-center justify-between transition-all ${
+                    className={`w-full p-3 rounded-2xl border text-start flex items-center justify-between transition-all cursor-pointer ${
                       isCurrent
                         ? `${theme.bgSoftClass} ${theme.borderActiveClass} text-white shadow-md`
                         : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-800/60 hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl p-1 bg-slate-950 rounded-xl border border-slate-800/80">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-2xl p-1 bg-slate-950 rounded-xl border border-slate-800/80 shrink-0">
                         {loc.flag}
                       </span>
-                      <div>
-                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
                           <span>{loc.country}</span>
-                          {loc.city && <span className="text-slate-400 font-normal">· {loc.city}</span>}
+                          {loc.city && <span className="text-slate-400 font-normal truncate">· {loc.city}</span>}
+                          {srv.isCustom && (
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${theme.bgSoftClass} ${theme.textLightClass} font-mono`}>
+                              {isAr ? 'مخصص' : 'Custom'}
+                            </span>
+                          )}
                         </div>
-                        <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                        <div className="text-[10px] text-slate-500 font-mono mt-0.5 truncate">
                           {loc.name} · {txt.serverLoad}: {loc.load}%
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <span
                         className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-bold ${
                           srv.ping < 60
@@ -729,9 +915,22 @@ export const AbrHomeView: React.FC<AbrHomeViewProps> = ({
                       >
                         {srv.ping} {txt.pingUnit}
                       </span>
+                      {srv.isCustom && onDeleteServer && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteServer(srv.id);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-rose-400"
+                          title={isAr ? 'حذف السيرفر' : 'Delete server'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                       {isCurrent && <CheckCircle2 className={`w-4 h-4 ${theme.textClass}`} />}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

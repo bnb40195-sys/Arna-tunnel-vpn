@@ -165,6 +165,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
             </div>
             <div className="space-y-1">
               {[
+                { id: 'server_analyzer', label: isAr ? 'محلل السيرفرات (هل شغال أم لا)' : 'Server Analyzer (Online/Off)', icon: Activity },
                 { id: 'config_sites', label: isAr ? 'مواقع صنع الكونفيجات' : 'Config Creator Sites', icon: Globe2 },
                 { id: 'speed_test', label: t.speedTest, icon: Gauge },
                 { id: 'host_checker', label: t.hostChecker, icon: Search },

@@ -44,6 +44,7 @@ import { EncoderDecoder } from './components/tools/EncoderDecoder';
 import { ConnectionLogs } from './components/tools/ConnectionLogs';
 import { ConfigSitesTool } from './components/tools/ConfigSitesTool';
 import { VpnHotspotShare } from './components/tools/VpnHotspotShare';
+import { ServerAnalyzer } from './components/tools/ServerAnalyzer';
 
 // Modals
 import { AddTimeModal } from './components/AddTimeModal';
@@ -122,14 +123,37 @@ export default function App() {
   const [downloadedBytes, setDownloadedBytes] = useState(0);
   const [uploadedBytes, setUploadedBytes] = useState(0);
 
-  // Connection State
+  // Connection State & Custom Servers
   const [connectionState, setConnectionState] = useState<ConnectionState>('disconnected');
   const [, setRemainingSeconds] = useState(900);
-  const [selectedServer, setSelectedServer] = useState<VpnServer>(INITIAL_SERVERS[0]);
+  const [customServers, setCustomServers] = useState<VpnServer[]>(() => {
+    try {
+      const raw = localStorage.getItem('arna_custom_servers_v1');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // ignore invalid storage
+    }
+    return [];
+  });
+  const allServers: VpnServer[] = [...customServers, ...INITIAL_SERVERS];
+  const [selectedServer, setSelectedServer] = useState<VpnServer>(
+    () => allServers[0] || INITIAL_SERVERS[0]
+  );
   const [activeConfigName, setActiveConfigName] = useState<string | null>('OOREDOO Free (Some Areas)');
 
   // Logs
   const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('arna_custom_servers_v1', JSON.stringify(customServers));
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [customServers]);
 
   useEffect(() => {
     document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr';
@@ -217,7 +241,33 @@ export default function App() {
     }
   };
 
-  const ONLINE_TOOLS = new Set(['config_sites', 'speed_test', 'host_checker', 'same_ip']);
+  const ONLINE_TOOLS = new Set(['config_sites', 'server_analyzer', 'speed_test', 'host_checker', 'same_ip']);
+
+  const handleAddServer = (srvData: Omit<VpnServer, 'id'>) => {
+    const created: VpnServer = {
+      ...srvData,
+      id: `srv-custom-${Date.now()}`,
+      isCustom: true,
+    };
+    setCustomServers((prev) => [created, ...prev]);
+    setSelectedServer(created);
+    addLog('INFO', `تمت إضافة السيرفر المخصص: ${created.name} (${created.ip})`);
+  };
+
+  const handleDeleteServer = (serverId: string) => {
+    setCustomServers((prev) => prev.filter((s) => s.id !== serverId));
+    if (selectedServer.id === serverId) {
+      setSelectedServer(INITIAL_SERVERS[0]);
+    }
+    addLog('INFO', 'تم حذف السيرفر المخصص.');
+  };
+
+  const handleUpdateServerPing = (serverId: string, ping: number) => {
+    setCustomServers((prev) =>
+      prev.map((s) => (s.id === serverId ? { ...s, ping } : s))
+    );
+    setSelectedServer((prev) => (prev.id === serverId ? { ...prev, ping } : prev));
+  };
 
   const handleToggleConnect = () => {
     if (connectionState === 'connected') {
@@ -369,11 +419,14 @@ export default function App() {
               connectionState={connectionState}
               onToggleConnect={handleToggleConnect}
               selectedServer={selectedServer}
-              servers={INITIAL_SERVERS}
+              servers={allServers}
               onSelectServer={(srv) => {
                 setSelectedServer(srv);
                 addLog('INFO', `تم تغيير السيرفر إلى: ${srv.country} (${srv.city || ''})`);
               }}
+              onAddServer={handleAddServer}
+              onDeleteServer={handleDeleteServer}
+              onOpenServerAnalyzer={() => handleOpenTool('server_analyzer')}
               abrConfig={abrConfig}
               onUpdateAbrConfig={(updates) => {
                 setAbrConfig((prev) => ({ ...prev, ...updates }));
@@ -591,6 +644,24 @@ export default function App() {
                   onRequestInternet={(descAr, descEn) =>
                     requestInternetAccess(descAr, descEn)
                   }
+                />
+              )}
+
+              {activeTool === 'server_analyzer' && (
+                <ServerAnalyzer
+                  language={settings.language}
+                  themeAccent={settings.themeAccent}
+                  servers={allServers}
+                  onAddServer={handleAddServer}
+                  onUpdateServerPing={handleUpdateServerPing}
+                  connectionState={connectionState}
+                  onToggleConnect={handleToggleConnect}
+                  isOnline={isOnline}
+                  onRequestInternet={(descAr, descEn) =>
+                    requestInternetAccess(descAr, descEn)
+                  }
+                  onBack={() => setActiveTool(null)}
+                  onOpenHelp={openHelp}
                 />
               )}
 

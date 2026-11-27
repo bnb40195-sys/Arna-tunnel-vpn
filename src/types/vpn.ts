@@ -27,6 +27,7 @@ export interface VpnServer {
   load: number;
   type: string;
   speed: string;
+  isCustom?: boolean;
 }
 
 export interface AbrTunnelConfig {

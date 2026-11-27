@@ -207,6 +207,46 @@ const CONFIG_CREATOR_SITES: ConfigSiteItem[] = [
     descEn: 'Another source providing free SSH and VPN accounts across various geographic locations.',
     tags: ['SSH', 'VPN'],
   },
+  {
+    id: 'checkhost',
+    name: 'Check-Host.net',
+    url: 'https://check-host.net',
+    descAr: 'تحليل وفحص حالة السيرفرات والمنافذ والبينغ عالمياً للتأكد هل السيرفر شغال أم لا.',
+    descEn: 'Global TCP, Ping, and HTTP check to verify if any server is online.',
+    tags: ['Server Check'],
+  },
+  {
+    id: 'pingpe',
+    name: 'Ping.pe',
+    url: 'https://ping.pe',
+    descAr: 'اختبار البينغ والمنافذ وفقدان الحزم لأي سيرفر من أكثر من 30 موقعاً.',
+    descEn: 'Live ping, packet loss, and port tests across 30+ global locations.',
+    tags: ['Server Check'],
+  },
+  {
+    id: 'yougetsignal',
+    name: 'YouGetSignal Port Checker',
+    url: 'https://www.yougetsignal.com/tools/open-ports/',
+    descAr: 'فحص المنافذ المفتوحة على السيرفر (22، 80، 443، 8080) لمعرفة مدى استجابتها.',
+    descEn: 'Verify open ports on any server (22, 80, 443, 8080) live.',
+    tags: ['Server Check'],
+  },
+  {
+    id: 'dnschecker',
+    name: 'DNSChecker.org',
+    url: 'https://dnschecker.org',
+    descAr: 'تحليل استجابة النطاق وعناوين الـ IP للسيرفر عبر خوادم DNS متعددة.',
+    descEn: 'Check server domain resolution and IP records worldwide.',
+    tags: ['Server Check'],
+  },
+  {
+    id: 'sslshopper',
+    name: 'SSL Shopper Checker',
+    url: 'https://www.sslshopper.com/ssl-checker.html',
+    descAr: 'فحص شهادة SSL/TLS وصلاحية SNI السيرفر على المنفذ 443.',
+    descEn: 'Check SSL/TLS certificate & SNI validity for port 443 servers.',
+    tags: ['Server Check'],
+  },
 ];
 
 export const ConfigSitesTool: React.FC<ConfigSitesToolProps> = ({
@@ -293,7 +333,7 @@ export const ConfigSitesTool: React.FC<ConfigSitesToolProps> = ({
     );
   });
 
-  const tags = ['ALL', 'SSH', 'V2Ray', 'Trojan', 'WireGuard', 'OpenVPN'];
+  const tags = ['ALL', 'Server Check', 'SSH', 'V2Ray', 'Trojan', 'WireGuard', 'OpenVPN'];
 
   return (
     <div className="space-y-4 max-w-lg mx-auto pb-8 font-sans animate-fade-in">
@@ -432,7 +472,11 @@ export const ConfigSitesTool: React.FC<ConfigSitesToolProps> = ({
                   : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
               }`}
             >
-              {tag === 'ALL' ? (isAr ? `الكل (${CONFIG_CREATOR_SITES.length})` : `All (${CONFIG_CREATOR_SITES.length})`) : tag}
+              {tag === 'ALL'
+                ? (isAr ? `الكل (${CONFIG_CREATOR_SITES.length})` : `All (${CONFIG_CREATOR_SITES.length})`)
+                : tag === 'Server Check'
+                ? (isAr ? 'تحليل السيرفرات' : 'Server Check')
+                : tag}
             </button>
           ))}
         </div>

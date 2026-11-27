@@ -55,6 +55,12 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
       icon: Share2,
     },
     {
+      id: 'server_analyzer',
+      title: isAr ? 'محلل السيرفرات (هل شغال أم لا)' : 'Server Analyzer & Check Sites',
+      desc: isAr ? 'فحص فوري لعمل السيرفرات والمنافذ + مواقع التحليل العالمية داخل التطبيق' : 'Check if servers are online + built-in global server analysis websites',
+      icon: Activity,
+    },
+    {
       id: 'config_sites',
       title: isAr ? 'مواقع صنع الكونفيجات' : 'Config Creator Sites',
       desc: isAr ? 'مواقع إنشاء حسابات SSH و V2Ray و Trojan مع فتحها بسرعة داخل التطبيق' : 'Free SSH, V2Ray & Trojan creator websites opened fast inside the app',
@@ -117,7 +123,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
           <h2 className="text-sm font-bold font-mono text-white flex items-center gap-2">
             <span>{isAr ? 'أدوات الشبكة والتشخيص' : 'NETWORK TOOLS & UTILITIES'}</span>
             <span className={`text-[10px] ${theme.bgSoftClass} ${theme.textLightClass} font-mono px-1.5 py-0.5 rounded`}>
-              {isAr ? '11 أداة' : '11 TOOLS'}
+              {isAr ? '12 أداة' : '12 TOOLS'}
             </span>
           </h2>
           <p className="text-[11px] text-slate-400">

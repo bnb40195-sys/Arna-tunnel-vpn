@@ -31,6 +31,15 @@ const ALLOWED_CONFIG_DOMAINS = [
   'bestv2ray.com',
   'sshstores.net',
   'freevpn.us',
+  // Server & Network Analysis Sites
+  'check-host.net',
+  'ping.pe',
+  'dnschecker.org',
+  'sslshopper.com',
+  'bgp.he.net',
+  'yougetsignal.com',
+  'mxtoolbox.com',
+  'radar.cloudflare.com',
 ];
 
 interface CachedPage {
@@ -141,6 +150,70 @@ async function resolvePublicHost(hostname: string): Promise<{ ipv4: string[]; ip
   }
 
   return { ipv4, ipv6, cnames };
+}
+
+function probeTcpPort(
+  targetIp: string,
+  port: number
+): Promise<{
+  connected: boolean;
+  latencyMs: number;
+  banner: string | null;
+  error?: string;
+}> {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    let settled = false;
+    let bannerText = '';
+
+    const finish = (res: { connected: boolean; latencyMs: number; banner: string | null; error?: string }) => {
+      if (settled) return;
+      settled = true;
+      resolve(res);
+    };
+
+    const socket = net.createConnection({ host: targetIp, port });
+    socket.setTimeout(5000);
+
+    socket.on('connect', () => {
+      const latencyMs = Date.now() - start;
+      // Wait briefly to see if server emits an SSH/service banner
+      setTimeout(() => {
+        socket.destroy();
+        finish({
+          connected: true,
+          latencyMs,
+          banner: bannerText.trim() ? bannerText.trim().slice(0, 120) : null,
+        });
+      }, 220);
+    });
+
+    socket.on('data', (chunk) => {
+      if (bannerText.length < 160) {
+        bannerText += chunk.toString('utf8').replace(/[\r\n]+/g, ' ');
+      }
+    });
+
+    socket.on('timeout', () => {
+      socket.destroy();
+      finish({
+        connected: false,
+        latencyMs: Date.now() - start,
+        banner: null,
+        error: 'TCP timeout (5s)',
+      });
+    });
+
+    socket.on('error', (err) => {
+      socket.destroy();
+      finish({
+        connected: false,
+        latencyMs: Date.now() - start,
+        banner: null,
+        error: err.message,
+      });
+    });
+  });
 }
 
 function probeTlsHandshake(
@@ -374,7 +447,24 @@ async function startServer() {
       const dnsMs = Date.now() - dnsStart;
       const targetIp = resolved.ipv4[0] || resolved.ipv6[0];
 
-      const tlsResult = await probeTlsHandshake(targetIp, cleanHost, requestedPort);
+      const NON_TLS_PORTS = new Set([21, 22, 53, 80, 1194, 3128, 8000, 8080]);
+      const [tcpResult, tlsResult] = await Promise.all([
+        probeTcpPort(targetIp, requestedPort),
+        NON_TLS_PORTS.has(requestedPort)
+          ? Promise.resolve({
+              connected: false,
+              latencyMs: 0,
+              protocol: null,
+              cipherName: null,
+              alpnProtocol: null,
+              subjectCn: null,
+              issuer: null,
+              validTo: null,
+              sanDomains: [],
+              error: 'Plain TCP port (TLS skipped)',
+            })
+          : probeTlsHandshake(targetIp, cleanHost, requestedPort),
+      ]);
 
       let httpStatus: number | null = null;
       let httpStatusText: string | null = null;
@@ -425,6 +515,7 @@ async function startServer() {
         ipv4: resolved.ipv4,
         ipv6: resolved.ipv6,
         cnames: resolved.cnames,
+        tcp: tcpResult,
         tls: tlsResult,
         http: {
           status: httpStatus,
