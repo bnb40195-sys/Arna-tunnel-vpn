@@ -92,10 +92,10 @@ jobs:
             "platforms;android-35" \
             "build-tools;35.0.0"
 
-      - name: Setup Gradle 8.9
+      - name: Setup Gradle 8.14.3
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: '8.9'
+          gradle-version: '8.14.3'
 
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon --stacktrace

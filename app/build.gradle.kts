@@ -76,7 +76,9 @@ android {
 dependencies {
     implementation(libs.bundles.androidx.core)
     implementation(libs.bundles.webview.twa)
-    implementation(libs.hev.tunnel)
+    implementation(libs.hev.tunnel) {
+        isTransitive = false
+    }
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

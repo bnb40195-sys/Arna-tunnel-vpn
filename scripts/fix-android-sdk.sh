@@ -147,8 +147,8 @@ fi
 
 # 7. Generate Gradle Wrapper if gradle CLI is available and gradlew is missing
 if [ ! -f "$ROOT_DIR/gradlew" ] && command -v gradle >/dev/null 2>&1; then
-  echo "[+] Generating Gradle Wrapper (8.9)..."
-  gradle wrapper --gradle-version 8.9
+  echo "[+] Generating Gradle Wrapper (8.14.3)..."
+  gradle wrapper --gradle-version 8.14.3
 fi
 
 echo "[+] Setup complete! Next step to generate APK files:"

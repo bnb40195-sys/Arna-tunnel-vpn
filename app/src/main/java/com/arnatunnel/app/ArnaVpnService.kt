@@ -9,7 +9,6 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.core.app.NotificationCompat
-import org.amnezia.awg.hevtunnel.TProxyService
 import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.io.File
@@ -73,7 +72,7 @@ class ArnaVpnService : VpnService() {
         fun getTotalTxBytes(): Long {
             val tproxyTx = try {
                 if (isRunning) {
-                    val stats = TProxyService.TProxyGetStats()
+                    val stats = TProxyBridge.getStats()
                     if (stats != null && stats.size >= 4) stats[1] else 0L
                 } else 0L
             } catch (_: Throwable) {
@@ -85,7 +84,7 @@ class ArnaVpnService : VpnService() {
         fun getTotalRxBytes(): Long {
             val tproxyRx = try {
                 if (isRunning) {
-                    val stats = TProxyService.TProxyGetStats()
+                    val stats = TProxyBridge.getStats()
                     if (stats != null && stats.size >= 4) stats[3] else 0L
                 } else 0L
             } catch (_: Throwable) {
@@ -199,7 +198,7 @@ class ArnaVpnService : VpnService() {
 
         Thread({
             try {
-                TProxyService.TProxyStartService(configPath, tunFd)
+                TProxyBridge.start(configPath, tunFd)
             } catch (_: Throwable) {
             }
         }, "ArnaHevTunnel").apply {
@@ -400,13 +399,14 @@ class ArnaVpnService : VpnService() {
     ) {
         var upstream: Socket? = null
         try {
-            upstream = connectProtectedTcp(targetHost, targetPort)
-            upstream.tcpNoDelay = true
-            upstream.soTimeout = 0
+            val up = connectProtectedTcp(targetHost, targetPort)
+            upstream = up
+            up.tcpNoDelay = true
+            up.soTimeout = 0
             client.soTimeout = 0
 
             sendSocks5Reply(clientOut, 0x00)
-            pipeBidirectional(clientIn, clientOut, upstream.getInputStream(), upstream.getOutputStream())
+            pipeBidirectional(clientIn, clientOut, up.getInputStream(), up.getOutputStream())
         } catch (_: Exception) {
             try {
                 sendSocks5Reply(clientOut, 0x05) // Connection refused
@@ -536,11 +536,13 @@ class ArnaVpnService : VpnService() {
         controlIn: InputStream,
         controlOut: OutputStream
     ) {
-        var localUdp: DatagramSocket? = null
-        var upstreamUdp: DatagramSocket? = null
+        var cleanupLocalUdp: DatagramSocket? = null
+        var cleanupUpstreamUdp: DatagramSocket? = null
         try {
-            localUdp = DatagramSocket(0, InetAddress.getByName("127.0.0.1"))
-            upstreamUdp = DatagramSocket()
+            val localUdp = DatagramSocket(0, InetAddress.getByName("127.0.0.1"))
+            cleanupLocalUdp = localUdp
+            val upstreamUdp = DatagramSocket()
+            cleanupUpstreamUdp = upstreamUdp
             protect(upstreamUdp)
 
             val relayPort = localUdp.localPort
@@ -661,11 +663,11 @@ class ArnaVpnService : VpnService() {
         } catch (_: Exception) {
         } finally {
             try {
-                localUdp?.close()
+                cleanupLocalUdp?.close()
             } catch (_: Exception) {
             }
             try {
-                upstreamUdp?.close()
+                cleanupUpstreamUdp?.close()
             } catch (_: Exception) {
             }
             try {
@@ -747,7 +749,7 @@ class ArnaVpnService : VpnService() {
     private fun stopResourcesOnly() {
         if (tproxyStarted.compareAndSet(true, false)) {
             try {
-                TProxyService.TProxyStopService()
+                TProxyBridge.stop()
             } catch (_: Throwable) {
             }
         }
