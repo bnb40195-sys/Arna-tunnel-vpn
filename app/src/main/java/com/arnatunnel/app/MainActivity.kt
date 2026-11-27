@@ -61,8 +61,8 @@ class MainActivity : AppCompatActivity() {
         fun getStatsJson(): String {
             return JSONObject().apply {
                 put("connected", ArnaVpnService.isRunning)
-                put("txBytes", ArnaVpnService.txBytes.get())
-                put("rxBytes", ArnaVpnService.rxBytes.get())
+                put("txBytes", ArnaVpnService.getTotalTxBytes())
+                put("rxBytes", ArnaVpnService.getTotalRxBytes())
                 put("serverName", ArnaVpnService.activeServerName)
             }.toString()
         }
@@ -128,17 +128,18 @@ class MainActivity : AppCompatActivity() {
             putExtra(ArnaVpnService.EXTRA_SERVER_NAME, pendingServerName)
         }
         ContextCompat.startForegroundService(this, startIntent)
-        notifyWebVpnState("connected")
     }
 
     private fun notifyWebVpnState(state: String) {
-        val tx = ArnaVpnService.txBytes.get()
-        val rx = ArnaVpnService.rxBytes.get()
-        webView.post {
-            webView.evaluateJavascript(
-                "window.onArnaNativeVpnStateChanged && window.onArnaNativeVpnStateChanged('$state', $tx, $rx);",
-                null
-            )
+        val tx = ArnaVpnService.getTotalTxBytes()
+        val rx = ArnaVpnService.getTotalRxBytes()
+        if (::webView.isInitialized) {
+            webView.post {
+                webView.evaluateJavascript(
+                    "window.onArnaNativeVpnStateChanged && window.onArnaNativeVpnStateChanged('$state', $tx, $rx);",
+                    null
+                )
+            }
         }
     }
 
@@ -165,6 +166,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.addJavascriptInterface(ArnaVpnBridge(), "ArnaAndroidVpn")
+        ArnaVpnService.stateListener = { state ->
+            notifyWebVpnState(state)
+        }
         webView.webChromeClient = WebChromeClient()
 
         webView.webViewClient = object : WebViewClient() {
@@ -217,9 +221,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ArnaVpnService.stateListener = { state ->
+            notifyWebVpnState(state)
+        }
         if (::webView.isInitialized) {
             val state = if (ArnaVpnService.isRunning) "connected" else "disconnected"
             notifyWebVpnState(state)
         }
+    }
+
+    override fun onDestroy() {
+        ArnaVpnService.stateListener = null
+        super.onDestroy()
     }
 }
