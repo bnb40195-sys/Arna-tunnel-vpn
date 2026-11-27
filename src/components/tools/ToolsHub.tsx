@@ -1,8 +1,5 @@
 import React from 'react';
 import {
-  Gauge,
-  Search,
-  Server,
   Code2,
   Fingerprint,
   Cpu,
@@ -56,8 +53,10 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
     },
     {
       id: 'server_analyzer',
-      title: isAr ? 'محلل السيرفرات (هل شغال أم لا)' : 'Server Analyzer & Check Sites',
-      desc: isAr ? 'فحص فوري لعمل السيرفرات والمنافذ + مواقع التحليل العالمية داخل التطبيق' : 'Check if servers are online + built-in global server analysis websites',
+      title: isAr ? 'فحص السيرفرات و SNI والهوستات و IP والسرعة' : 'Servers, SNI, Host, IP & Speed Lab',
+      desc: isAr
+        ? 'قسم موحّد لفحص السيرفرات، SNI والهوستات، IP، اختبار سرعة الإنترنت، ومواقع التحليل'
+        : 'All-in-one section for Server probes, SNI/Host, IP/SAN, Internet Speed Test & Sites',
       icon: Activity,
     },
     {
@@ -65,24 +64,6 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
       title: isAr ? 'مواقع صنع الكونفيجات' : 'Config Creator Sites',
       desc: isAr ? 'مواقع إنشاء حسابات SSH و V2Ray و Trojan مع فتحها بسرعة داخل التطبيق' : 'Free SSH, V2Ray & Trojan creator websites opened fast inside the app',
       icon: Globe,
-    },
-    {
-      id: 'speed_test',
-      title: isAr ? 'اختبار سرعة الإنترنت' : 'Speed Test',
-      desc: isAr ? 'قياس سرعة التحميل والرفع والبينغ وتذبذب الشبكة' : 'Test download, upload, ping & jitter',
-      icon: Gauge,
-    },
-    {
-      id: 'host_checker',
-      title: isAr ? 'فاحص الهوست والـ SNI' : 'Host Checker',
-      desc: isAr ? 'فحص استجابة الهوستات والترويسات وشهادات CDN' : 'Check host info, headers, SNI & CDN',
-      icon: Search,
-    },
-    {
-      id: 'same_ip',
-      title: isAr ? 'فاحص النطاقات على نفس الـ IP' : 'Same IP Checker',
-      desc: isAr ? 'اكتشاف المواقع المستضافة على نفس عنوان الخادم' : 'Find domains hosted on the same IP',
-      icon: Server,
     },
     {
       id: 'payload_gen',
@@ -123,7 +104,7 @@ export const ToolsHub: React.FC<ToolsHubProps> = ({
           <h2 className="text-sm font-bold font-mono text-white flex items-center gap-2">
             <span>{isAr ? 'أدوات الشبكة والتشخيص' : 'NETWORK TOOLS & UTILITIES'}</span>
             <span className={`text-[10px] ${theme.bgSoftClass} ${theme.textLightClass} font-mono px-1.5 py-0.5 rounded`}>
-              {isAr ? '12 أداة' : '12 TOOLS'}
+              {isAr ? '9 أدوات' : '9 TOOLS'}
             </span>
           </h2>
           <p className="text-[11px] text-slate-400">

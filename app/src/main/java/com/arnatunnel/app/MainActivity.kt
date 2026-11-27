@@ -1,7 +1,9 @@
 package com.arnatunnel.app
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Bundle
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -37,12 +39,26 @@ class MainActivity : AppCompatActivity() {
             loadWithOverviewMode = true
         }
 
+        webView.webChromeClient = WebChromeClient()
+
         webView.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(
                 view: WebView,
                 request: WebResourceRequest
             ): WebResourceResponse? {
-                return assetLoader.shouldInterceptRequest(request.url)
+                val url = request.url
+                val direct = assetLoader.shouldInterceptRequest(url)
+                if (direct != null) return direct
+
+                if (url.host == "appassets.androidplatform.net") {
+                    val path = url.path ?: return null
+                    if (!path.startsWith("/assets/www/")) {
+                        val normalized = path.removePrefix("/")
+                        val fallbackUri = Uri.parse("https://appassets.androidplatform.net/assets/www/$normalized")
+                        return assetLoader.shouldInterceptRequest(fallbackUri)
+                    }
+                }
+                return null
             }
         }
 

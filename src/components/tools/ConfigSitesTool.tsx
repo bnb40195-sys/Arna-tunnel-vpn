@@ -211,8 +211,8 @@ const CONFIG_CREATOR_SITES: ConfigSiteItem[] = [
     id: 'checkhost',
     name: 'Check-Host.net',
     url: 'https://check-host.net',
-    descAr: 'تحليل وفحص حالة السيرفرات والمنافذ والبينغ عالمياً للتأكد هل السيرفر شغال أم لا.',
-    descEn: 'Global TCP, Ping, and HTTP check to verify if any server is online.',
+    descAr: 'تحليل وفحص حالة السيرفرات والمنافذ والبينغ والـ HTTP عالمياً عبر عدة دول.',
+    descEn: 'Global TCP, Ping, and HTTP check for servers and hosts worldwide.',
     tags: ['Server Check'],
   },
   {

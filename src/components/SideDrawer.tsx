@@ -8,9 +8,6 @@ import {
   Radio,
   Flame,
   Send,
-  Gauge,
-  Search,
-  Server,
   Cpu,
   Fingerprint,
   Activity,
@@ -165,11 +162,8 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
             </div>
             <div className="space-y-1">
               {[
-                { id: 'server_analyzer', label: isAr ? 'محلل السيرفرات (هل شغال أم لا)' : 'Server Analyzer (Online/Off)', icon: Activity },
+                { id: 'server_analyzer', label: isAr ? 'فحص السيرفرات و SNI و IP والسرعة' : 'Servers, SNI, IP & Speed Lab', icon: Activity },
                 { id: 'config_sites', label: isAr ? 'مواقع صنع الكونفيجات' : 'Config Creator Sites', icon: Globe2 },
-                { id: 'speed_test', label: t.speedTest, icon: Gauge },
-                { id: 'host_checker', label: t.hostChecker, icon: Search },
-                { id: 'same_ip', label: t.sameIpChecker, icon: Server },
                 { id: 'payload_gen', label: t.payloadGenerator, icon: Code2 },
                 { id: 'fingerprint', label: t.deviceFingerprint, icon: Fingerprint },
                 { id: 'diagnostics', label: t.systemDiagnostics, icon: Cpu },

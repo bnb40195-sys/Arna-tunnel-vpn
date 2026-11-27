@@ -50,9 +50,10 @@
 │   ├── libs.versions.toml            # كتالوج إصدارات Gradle (AGP 8.7.3, Kotlin 2.0.21, SDK 35)
 │   └── wrapper/gradle-wrapper.properties
 ├── .github/workflows/
-│   └── android-debug-apk.yml         # مسار بناء تلقائي على GitHub لإنتاج app-debug.apk
+│   └── android-debug-apk.yml         # مسار بناء وإصدار تلقائي على GitHub لإنتاج Debug و Release APK
 ├── scripts/
-│   └── fix-android-sdk.sh            # سكربت حل مشكلة إعداد Android SDK وملف local.properties
+│   ├── fix-android-sdk.sh            # سكربت تثبيت وحل مشكلة Android SDK على Linux / macOS / WSL
+│   └── fix-android-sdk.ps1           # سكربت تثبيت وحل مشكلة Android SDK على Windows PowerShell
 ├── build.gradle.kts                  # ملف Gradle الرئيسي
 ├── settings.gradle.kts               # تعريف المشروع وكتالوج الإصدارات
 ├── gradle.properties                 # إعدادات الذاكرة و AndroidX
@@ -60,7 +61,7 @@
 ├── public/                           # الأيقونات والأصول الثابتة لتطبيق PWA
 ├── src/                              # كود تطبيق React + TypeScript
 ├── server.ts                         # خادم Express + أدوات الفحص الشبكي الحقيقية + Vite middleware
-├── vite.config.ts                    # إعدادات Vite و VitePWA
+├── vite.config.ts                    # إعدادات Vite و VitePWA ودعم مسار الأندرويد النسبي
 └── package.json
 ```
 
@@ -95,14 +96,20 @@ npm start
 - `You have not accepted the license agreements of the following SDK components`
 - `Unsupported class file major version` / نقص **JDK 17**
 
-اتبع الخطوات التالية لحل المشكلة فوراً:
+اتبع الخطوات التالية لحل المشكلة تلقائياً:
 
-### 1) الحل السريع التلقائي (Linux / macOS / WSL)
-شغّل السكربت المرفق لضبط ملف `local.properties`، وقبول التراخيص، وتثبيت `Android 15 (API 35)` و`Build-Tools 35.0.0`، ونسخ ملفات الويب المبنية إلى التطبيق:
+### 1) الحل السريع التلقائي
+يقوم السكربت باكتشاف Android SDK (أو تحميل **Android Command-Line Tools** تلقائياً إذا لم تكن مثبتة)، وضبط ملف `local.properties`، وقبول التراخيص، وتثبيت `Android 15 (API 35)` و`Build-Tools 35.0.0`، وبناء أصول الأندرويد:
 
+- **Linux / macOS / WSL:**
 ```bash
 chmod +x scripts/fix-android-sdk.sh
 ./scripts/fix-android-sdk.sh
+```
+
+- **Windows (PowerShell):**
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/fix-android-sdk.ps1
 ```
 
 ### 2) الحل اليدوي لملف `local.properties`
@@ -125,37 +132,42 @@ chmod +x scripts/fix-android-sdk.sh
 1. تأكد من تثبيت **Java JDK 17** (في Android Studio: `Settings > Build Tools > Gradle > Gradle JDK = jbr-17`).
 2. افتح `Tools > SDK Manager`:
    - في تبويب **SDK Platforms**: ثبّت **Android 15.0 (API Level 35)**.
-   - في تبويب **SDK Tools**: ثبّت **Android SDK Build-Tools 35.0.0** و **Android SDK Platform-Tools**.
+   - في تبويب **SDK Tools**: ثبّت **Android SDK Command-line Tools (latest)** و **Android SDK Build-Tools 35.0.0** و **Android SDK Platform-Tools**.
 3. إذا استخدمت الطرفية، اقبل التراخيص عبر:
    ```bash
    yes | sdkmanager --licenses
-   sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+   sdkmanager "cmdline-tools;latest" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
    ```
 
 ---
 
-## إنشاء ملف تصحيح الأخطاء (`app-debug.apk`)
+## إنشاء ملفات APK وإصدارها (`Debug` و `Release`)
 
-> **ملاحظة تقنية:** هذه البيئة السحابية تحتوي على Node.js فقط ولا تضم **Java JDK** أو **Android SDK**، لذلك لا يمكن تصدير ملف `.apk` تنفيذي مباشرة من داخل متصفح المعاينة؛ لكن المشروع أصبح مهيأً بالكامل بجميع ملفات Gradle لبنائه في دقيقة واحدة عبر أي من الطريقتين التاليتين:
+> **ملاحظة تقنية:** بيئة المعاينة السحابية تحتوي على Node.js فقط ولا تضم **Java JDK** أو **Android SDK**، لكن المشروع مهيأ بالكامل لبناء وتوقيع ملفات APK تلقائياً عبر GitHub Actions أو محلياً:
 
-### الطريقة الأولى: البناء السحابي التلقائي عبر GitHub Actions (بدون تثبيت أي برامج)
-تمت إضافة ملف `.github/workflows/android-debug-apk.yml`. بمجرد رفع المشروع إلى مستودع GitHub وتشغيل الـ Workflow:
-1. يقوم تلقائياً ببناء نسخة الويب (`npm run build`) ونسخها إلى `app/src/main/assets/www/`.
-2. يثبّت **JDK 17** و **Android SDK 35** و **Gradle 8.9**.
-3. ينفّذ `gradle assembleDebug` ويرفع ملف **`app-debug.apk`** الجاهز للتحميل من قسم **Artifacts**.
+### الطريقة الأولى: البناء والإصدار التلقائي عبر GitHub Actions
+تم إصلاح ملف `.github/workflows/android-debug-apk.yml` بالكامل ليقوم بما يلي:
+1. تثبيت حزم الويب وبناء حزمة الأندرويد بمسار نسبي (`ANDROID_BUILD=true npm run build`) ونسخها إلى `app/src/main/assets/www/`.
+2. إعداد **JDK 17** و **Android SDK 35** وكتابة `local.properties` و **Gradle 8.9**.
+3. بناء **`Arna-tunnel-debug.apk`** (`assembleDebug`) وبناء **`Arna-tunnel-release.apk`** الموقّع (`assembleRelease`) مع التحقق عبر `apksigner`.
+4. رفع الملفين في قسم **Artifacts**، وعند دفع وسم إصدار مثل `v1.0.0` (أو تشغيل `workflow_dispatch` مع تحديد `release_tag`) يتم نشر **GitHub Release** رسمي مرفق به ملفا الـ APK مباشرة.
+
+*(اختيارياً: لتوقيع نسخة Release بمفتاحك الدائم، أضف الأسرار `ANDROID_KEYSTORE_BASE64` و `ANDROID_KEYSTORE_PASSWORD` و `ANDROID_KEY_ALIAS` و `ANDROID_KEY_PASSWORD` في إعدادات مستودع GitHub، وإلا سيقوم الـ Workflow بإنشاء مفتاح توقيع صالح تلقائياً.)*
 
 ### الطريقة الثانية: البناء محلياً عبر Android Studio أو الطرفية
 ```bash
-# 1. بناء واجهة الويب ونسخها إلى أصول الأندرويد
-npm run build
-mkdir -p app/src/main/assets/www
+# 1. بناء واجهة الويب بمسار أندرويد ونسخها إلى أصول التطبيق
+ANDROID_BUILD=true npm run build
+rm -rf app/src/main/assets/www && mkdir -p app/src/main/assets/www
 cp -r dist/. app/src/main/assets/www/
 
-# 2. إنشاء ملف تصحيح الأخطاء Debug APK
-gradle assembleDebug
+# 2. إنشاء ملف التصحيح Debug APK وملف Release APK
+gradle assembleDebug assembleRelease
 ```
-ستجد الملف النهائي في المسار:
+ستجد الملفات النهائية في:
 ```text
 app/build/outputs/apk/debug/app-debug.apk
+app/build/outputs/apk/release/
 ```
 أو افتح المجلد في **Android Studio** واضغط `Build > Build Bundle(s) / APK(s) > Build APK(s)`.
+

@@ -34,9 +34,6 @@ import { HysteriaConfig } from './components/protocols/HysteriaConfig';
 import { V2RayConfig } from './components/protocols/V2RayConfig';
 
 // Tools
-import { SpeedTest } from './components/tools/SpeedTest';
-import { HostChecker } from './components/tools/HostChecker';
-import { SameIPChecker } from './components/tools/SameIPChecker';
 import { PayloadGenerator } from './components/tools/PayloadGenerator';
 import { DeviceFingerprint } from './components/tools/DeviceFingerprint';
 import { SystemDiagnostics } from './components/tools/SystemDiagnostics';
@@ -647,7 +644,10 @@ export default function App() {
                 />
               )}
 
-              {activeTool === 'server_analyzer' && (
+              {(activeTool === 'server_analyzer' ||
+                activeTool === 'speed_test' ||
+                activeTool === 'host_checker' ||
+                activeTool === 'same_ip') && (
                 <ServerAnalyzer
                   language={settings.language}
                   themeAccent={settings.themeAccent}
@@ -660,33 +660,15 @@ export default function App() {
                   onRequestInternet={(descAr, descEn) =>
                     requestInternetAccess(descAr, descEn)
                   }
-                  onBack={() => setActiveTool(null)}
-                  onOpenHelp={openHelp}
-                />
-              )}
-
-              {activeTool === 'speed_test' && (
-                <SpeedTest
-                  language={settings.language}
-                  themeAccent={settings.themeAccent}
-                  onBack={() => setActiveTool(null)}
-                  onOpenHelp={openHelp}
-                />
-              )}
-
-              {activeTool === 'host_checker' && (
-                <HostChecker
-                  language={settings.language}
-                  themeAccent={settings.themeAccent}
-                  onBack={() => setActiveTool(null)}
-                  onOpenHelp={openHelp}
-                />
-              )}
-
-              {activeTool === 'same_ip' && (
-                <SameIPChecker
-                  language={settings.language}
-                  themeAccent={settings.themeAccent}
+                  initialTab={
+                    activeTool === 'speed_test'
+                      ? 'speed'
+                      : activeTool === 'host_checker'
+                      ? 'host_sni'
+                      : activeTool === 'same_ip'
+                      ? 'ip_san'
+                      : 'servers'
+                  }
                   onBack={() => setActiveTool(null)}
                   onOpenHelp={openHelp}
                 />

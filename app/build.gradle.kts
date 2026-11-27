@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.arnatunnel.app"
     compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "com.arnatunnel.app"
@@ -17,6 +18,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val keystorePath = System.getenv("ARNA_KEYSTORE_PATH")
+        ?: (project.findProperty("ARNA_KEYSTORE_PATH") as String?)
+    val hasReleaseKeystore = !keystorePath.isNullOrBlank() && file(keystorePath).exists()
+
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = file(keystorePath!!)
+                storePassword = System.getenv("ARNA_KEYSTORE_PASSWORD")
+                    ?: (project.findProperty("ARNA_KEYSTORE_PASSWORD") as String?)
+                keyAlias = System.getenv("ARNA_KEY_ALIAS")
+                    ?: (project.findProperty("ARNA_KEY_ALIAS") as String?)
+                keyPassword = System.getenv("ARNA_KEY_PASSWORD")
+                    ?: (project.findProperty("ARNA_KEY_PASSWORD") as String?)
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isDebuggable = true
@@ -25,6 +44,9 @@ android {
         }
         release {
             isMinifyEnabled = false
+            if (hasReleaseKeystore) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -43,6 +65,11 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 }
 

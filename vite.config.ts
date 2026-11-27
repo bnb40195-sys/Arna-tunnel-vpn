@@ -5,11 +5,15 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
+  const isAndroidBuild = process.env.ANDROID_BUILD === 'true';
+
   return {
+    base: isAndroidBuild ? './' : '/',
     plugins: [
       react(),
       tailwindcss(),
       VitePWA({
+        selfDestroying: isAndroidBuild,
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         manifest: {
